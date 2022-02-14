@@ -31,7 +31,9 @@
       <br />
       <br />
       <h3 id="totalBelanja"></h3>
+      
     </center>
+    </button>
   </body>
 
   <script>
@@ -43,6 +45,9 @@
         this.stock = stock;
         this.quantityInCart = 0;
       }
+      calculateTotalPrice = () => {
+        return this.price * this.cartQuantity;
+      };
     }
 
     let inventory = [
@@ -57,6 +62,13 @@
         "https://d29c1z66frfv6c.cloudfront.net/pub/media/catalog/product/large/fc7f1fa35236905d10b51f655c204eaa4c1bc92a_xxl-1.jpg",
         "Silk Blend Polo Shirt",
         549900,
+        10,
+        0
+      ),
+      new Produk(
+        "https://d29c1z66frfv6c.cloudfront.net/pub/media/catalog/product/large/6492fbc2b31d4819d1d5c4159149813d5a8baa66_xxl-1.jpg",
+        "Patterned Socks",
+        50000,
         10,
         0
       ),
@@ -84,7 +96,7 @@
                     +
                   </button>
                 </td>
-              </tr>;`;
+              </tr>`;
       });
       document.getElementById("tableProduct").innerHTML = productList;
     };
@@ -92,35 +104,109 @@
 
     const tambahQuantity = (idx) => {
       const tambahInput = parseInt(document.getElementById("tambah").value);
-      inventory[idx].quantityInCart += tambahInput;
 
-      if (inventory[idx].quantityInCart > inventory[idx].stock) {
-        inventory[idx].quantityInCart = inventory[idx].stock;
+      if (inventory[idx].quantityInCart < inventory[idx].stock) {
+        inventory[idx].quantityInCart += tambahInput;
+        renderData();
+      } else {
         alert("stock habis");
       }
-      renderData();
+      return renderData(idx);
     };
     const kurangQuantity = (idx) => {
       const kurangInput = parseInt(document.getElementById("kurang").value);
-      inventory[idx].quantityInCart -= kurangInput;
 
-      if ((inventory[idx].quantityInCart = 0)) {
-        renderData();
+      if (inventory[idx].quantityInCart > 0) {
+        inventory[idx].quantityInCart -= kurangInput;
       }
-      renderData();
+      return renderData(idx);
     };
 
+    let timeout;
     const checkOut = () => {
       let totalCart = 0;
+      let counter = 60;
+
+      timeOut = setInterval(() => {
+        counter--;
+        document.getElementById("countDown").innerHTML = counter;
+        if (counter < 0) {
+            alert("Waktu Anda Habis!");
+            stopTimeOut();
+            let noCheckout = (document.getElementById("checkout").innerHTML =
+              "");
+          }
+        }, 1000);
+
       inventory.forEach((val, idx) => {
-        val.stock -= val.quantityInCart;
         let belanjaPerProduk = val.price * val.quantityInCart;
         totalCart += belanjaPerProduk;
+        
       });
       document.getElementById(
         "totalBelanja"
-      ).innerHTML = `Total belanja anda adalah Rp. ${totalCart.toLocaleString()}`;
-      renderData();
-    };
+      ).innerHTML = `Total belanja anda adalah Rp. ${totalCart.toLocaleString()}
+      <h4>Masukan Pembayaran</h4>
+      <input type="number" id="1">
+      <button class="btn btn-success" onclick="payButton()">PAY</button>
+      <button class="btn btn-danger" onclick="cancelButton()">CANCEL</button>
+      <h5>Sisa Waktu Anda: <span id="countDown">60</span></h5>` 
+      renderData()
+    }
+
+    function payButton() {
+      let totalPrice = 0;
+      let yourChange = 0;
+      function refresh(message) {
+      alert(message);
+
+      let noCheckout = (document.getElementById("checkout").innerHTML = "");
+
+      inventory.forEach((val, idx) => {
+      val.stock -= val.quantityInCart; //mengurangi stock
+      val.quantityInCart = 0; //reset quantityInCart jadi 0
+      });
+
+        stopTimeOut();
+        return renderData();
+      }
+
+      inventory.forEach((val, idx) => {
+      totalPrice += val.calculateTotalPrice();
+      });
+
+      let totalPembayaran = document.getElementById("1").value
+      
+      if(totalPembayaran>totalPrice){
+        yourChange = totalWallet - totalPrice;
+        message = `Terimakasih! Kembalian Anda Rp ${yourChange.toLocaleString()},-`;
+        refresh(message);
+      }else if(totalPembayaran == totalPrice){
+        message = `Uang Anda Pas. Terimakasih atas Pembeliannya!`;
+        refresh(message);
+      }else {
+          alert(
+            `Uang Anda Kurang Rp ${(
+              totalPrice - totalWallet
+            ).toLocaleString()},-`
+          );
+        }
+
+      function cancelButton() {
+        renderData();
+        stopTimeOut();
+        let noCheckout = (document.getElementById("checkout").innerHTML = "");
+      }
+
+      function stopTimeOut() {
+        clearInterval(timeOut);
+      }
+
+    }
+
+
+
+    
+    
   </script>
 </html>
