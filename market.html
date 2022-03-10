@@ -127,81 +127,81 @@
       let totalCart = 0;
       let counter = 60;
 
+      inventory.forEach((val, idx) => {
+        let belanjaPerProduk = val.price * val.quantityInCart;
+        totalCart += belanjaPerProduk;
+        val.quantityInCart = 0
+      });
+      document.getElementById(
+        "totalBelanja"
+      ).innerHTML = `Total belanja anda adalah Rp. ${totalCart.toLocaleString()}
+      <h4>Masukan Pembayaran</h4>
+      <input type="number" id="inputBayar">
+      <button class="btn btn-success" onclick="payButton()">Bayar</button>
+      <button class="btn btn-danger" onclick="cancelButton()">Batal</button>
+      <h5>Sisa Waktu Anda: <span id="countDown">60</span></h5>` 
       timeOut = setInterval(() => {
         counter--;
         document.getElementById("countDown").innerHTML = counter;
         if (counter < 0) {
             alert("Waktu Anda Habis!");
             stopTimeOut();
-            let noCheckout = (document.getElementById("checkout").innerHTML =
-              "");
+            inventory.forEach((val,idx)=>{
+            val.checkOut() = 0 //reset qty jadi 0
+            })
+            document.getElementById("totalBelanja").innerHTML = "";
           }
-        }, 1000);
-
-      inventory.forEach((val, idx) => {
-        let belanjaPerProduk = val.price * val.quantityInCart;
-        totalCart += belanjaPerProduk;
-        
-      });
-      document.getElementById(
-        "totalBelanja"
-      ).innerHTML = `Total belanja anda adalah Rp. ${totalCart.toLocaleString()}
-      <h4>Masukan Pembayaran</h4>
-      <input type="number" id="1">
-      <button class="btn btn-success" onclick="payButton()">PAY</button>
-      <button class="btn btn-danger" onclick="cancelButton()">CANCEL</button>
-      <h5>Sisa Waktu Anda: <span id="countDown">60</span></h5>` 
+        }, 100);
       renderData()
     }
+    function stopTimeOut() {
+        clearInterval(timeOut);
+      }
 
     function payButton() {
       let totalPrice = 0;
       let yourChange = 0;
-      function refresh(message) {
-      alert(message);
-
-      let noCheckout = (document.getElementById("checkout").innerHTML = "");
-
+ 
       inventory.forEach((val, idx) => {
-      val.stock -= val.quantityInCart; //mengurangi stock
-      val.quantityInCart = 0; //reset quantityInCart jadi 0
+        let belanjaPerProduk = val.price * val.quantityInCart;
+        totalPrice += belanjaPerProduk;
       });
 
-        stopTimeOut();
-        return renderData();
-      }
-
-      inventory.forEach((val, idx) => {
-      totalPrice += val.calculateTotalPrice();
-      });
-
-      let totalPembayaran = document.getElementById("1").value
+      let totalPembayaran = parseInt(document.getElementById("inputBayar").value)
       
       if(totalPembayaran>totalPrice){
-        yourChange = totalWallet - totalPrice;
-        message = `Terimakasih! Kembalian Anda Rp ${yourChange.toLocaleString()},-`;
-        refresh(message);
+        yourChange = totalPembayaran - totalPrice;
+        alert(`Terimakasih! Kembalian Anda Rp ${yourChange.toLocaleString()},-`);
+        
       }else if(totalPembayaran == totalPrice){
-        message = `Uang Anda Pas. Terimakasih atas Pembeliannya!`;
-        refresh(message);
+        alert(`Uang Anda Pas. Terimakasih atas Pembeliannya!`);
+        
       }else {
           alert(
             `Uang Anda Kurang Rp ${(
-              totalPrice - totalWallet
+              totalPrice - totalPembayaran
             ).toLocaleString()},-`
           );
         }
 
-      function cancelButton() {
-        renderData();
-        stopTimeOut();
-        let noCheckout = (document.getElementById("checkout").innerHTML = "");
-      }
+    
+    stopTimeOut();
 
-      function stopTimeOut() {
-        clearInterval(timeOut);
-      }
+    inventory.forEach((val, idx) => {
+    val.stock -= val.quantityInCart; //mengurangi stock
+    val.quantityInCart = 0; //reset quantityInCart jadi 0
+    });
 
+    document.getElementById("totalBelanja").innerHTML = "";
+
+    renderData()
+    }
+
+    function cancelButton() {
+      alert("transaksi dibatalkan")
+      stopTimeOut();
+      document.getElementById("totalBelanja").innerHTML = ""
+      renderData();
     }
 
 
